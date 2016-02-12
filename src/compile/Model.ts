@@ -14,7 +14,7 @@ import * as vlEncoding from '../encoding';
 import {Mark, BAR, TICK, TEXT as TEXTMARK} from '../mark';
 
 import {getFullName, QUANTITATIVE} from '../type';
-import {duplicate, extend, contains, mergeDeep} from '../util';
+import {duplicate, extend, contains, mergeDeep, vals} from '../util';
 
 import {compileMarkConfig} from './config';
 import {compileStackProperties, StackProperties} from './stack';
@@ -31,6 +31,8 @@ export interface ScaleMap {
   size?: Scale;
   shape?: Scale;
 };
+
+import {Selection, parseSelections} from '../parse/selections';
 
 /**
  * Internal model of Vega-Lite specification for the compiler.
@@ -56,10 +58,13 @@ export class Model {
 
   private _config: Config;
 
+  private _selections: any;
+
   constructor(spec: Spec) {
     const model = this; // For self-reference in children method.
 
     this._spec = spec;
+    this._selections = [];
 
     const mark = this._spec.mark;
 
@@ -149,6 +154,8 @@ export class Model {
     // calculate stack
     this._stack = compileStackProperties(mark, encoding, scale, config);
     this._config.mark = compileMarkConfig(mark, encoding, config, this._stack);
+
+    parseSelections(this);
   }
 
   public stack(): StackProperties {
@@ -207,15 +214,14 @@ export class Model {
     return this._spec.encoding;
   }
 
-  public fieldDef(channel: Channel): FieldDef {
-    // TODO: remove this || {}
-    // Currently we have it to prevent null pointer exception.
-    return this._spec.encoding[channel] || {};
+  public fieldDef(channel: Channel, rule: Boolean = false): FieldDef {
+    var def = this._spec.encoding[channel];
+    // TODO: HACK FOR NOW, just assume if it's a rule the first branch is the ruleDef.
+    return def.rule && !rule ? extend({}, vals(def.rule[0])[0], def) : def;
   }
 
   /** Get "field" reference for vega */
-  public field(channel: Channel, opt: FieldRefOption = {}) {
-    const fieldDef = this.fieldDef(channel);
+  public field(channel: Channel, opt: FieldRefOption = {}, fieldDef = this.fieldDef(channel)) {
     const scale = this.scale(channel);
 
     if (fieldDef.bin) { // bin has default suffix that depends on scaleType
@@ -345,5 +351,12 @@ export class Model {
         return bandSize / 1.5;
     }
     return this.config().mark.size;
+  }
+
+  public selection(name:string = undefined, def:Selection = undefined) {
+    var len = arguments.length;
+    return (!len) ? this._selections :
+      (len === 1) ? this._spec.select[name] :
+      (this._selections.push(def), def);
   }
 }

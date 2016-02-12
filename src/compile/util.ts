@@ -6,6 +6,7 @@ import {QUANTITATIVE, ORDINAL, TEMPORAL} from '../type';
 import {format as timeFormatExpr} from './time';
 import {contains} from '../util';
 import {SortOrder} from '../enums';
+import {compileProductionRule} from './rule';
 
 export const FILL_STROKE_CONFIG = ['fill', 'fillOpacity',
   'stroke', 'strokeWidth', 'strokeDash', 'strokeDashOffset', 'strokeOpacity',
@@ -13,33 +14,29 @@ export const FILL_STROKE_CONFIG = ['fill', 'fillOpacity',
 
 export function applyColorAndOpacity(p, model: Model) {
   const filled = model.config().mark.filled;
-  const fieldDef = model.fieldDef(COLOR);
 
   // Apply fill stroke config first so that color field / value can override
   // fill / stroke
   applyMarkConfig(p, model, FILL_STROKE_CONFIG);
 
-  let value;
-  if (model.has(COLOR)) {
-    value = {
-      scale: model.scaleName(COLOR),
-      field: model.field(COLOR, fieldDef.type === ORDINAL ? {prefn: 'rank_'} : {})
-    };
-  } else if (fieldDef && fieldDef.value) {
-    value = { value: fieldDef.value };
-  }
-
-  if (value !== undefined) {
-    if (filled) {
-      p.fill = value;
-    } else {
-      p.stroke = value;
+  const property = filled ? 'fill' : 'stroke';
+  compileProductionRule(model, COLOR, p, function(fieldDef) {
+    let value, prop = {};
+    if (model.has(COLOR)) {
+      value = {
+        scale: model.scaleName(COLOR),
+        field: model.field(COLOR, fieldDef.type === ORDINAL ? {prefn: 'rank_'} : {})
+      };
+    } else if (fieldDef && fieldDef.value) {
+      value = { value: fieldDef.value };
     }
-  } else {
-    // apply color config if there is no fill / stroke config
-    p[filled ? 'fill' : 'stroke'] = p[filled ? 'fill' : 'stroke'] ||
-      {value: model.config().mark.color};
-  }
+
+    prop[property] = value || p[property] || {value: model.config().mark.color};
+
+    if (value !== undefined) {
+      prop[property] = value
+    }
+  });
 }
 
 export function applyConfig(properties, config, propsList: string[]) {
