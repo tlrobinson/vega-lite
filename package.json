@@ -18,7 +18,7 @@
     "test": "test"
   },
   "scripts": {
-    "build": "browserify src/vl.ts -p tsify -d -s vl > vega-lite.js",
+    "build": "rollup -c",
     "postbuild": "uglifyjs vega-lite.js -cm --source-map vega-lite.min.js.map > vega-lite.min.js && npm run schema",
     "build:all": "npm run clean && npm run data && npm run build && npm test && npm run lint && npm run build:images",
     "build:images": "scripts/generate-images.sh",
@@ -61,7 +61,11 @@
     "istanbul": "^0.4.2",
     "json-diff": "^0.3.1",
     "mocha": "^2.4.5",
-    "nodemon": "^1.9.0",
+    "nodemon": "^1.8.1",
+    "rollup": "^0.25.4",
+    "rollup-plugin-commonjs": "^2.2.1",
+    "rollup-plugin-node-resolve": "^1.4.0",
+    "rollup-plugin-typescript": "^0.5.0",
     "source-map-support": "^0.4.0",
     "tsify": "^0.13.2",
     "tslint": "^3.4.0",
