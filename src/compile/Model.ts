@@ -214,10 +214,10 @@ export class Model {
     return this._spec.encoding;
   }
 
-  public fieldDef(channel: Channel, rule: Boolean = false): FieldDef {
+  public fieldDef(channel: Channel, getRule: Boolean = false): FieldDef {
     var def = this._spec.encoding[channel];
     // TODO: HACK FOR NOW, just assume if it's a rule the first branch is the ruleDef.
-    return def.rule && !rule ? extend({}, vals(def.rule[0])[0], def) : def;
+    return def.rule && !getRule ? extend({}, def.rule[0], def) : def;
   }
 
   /** Get "field" reference for vega */
