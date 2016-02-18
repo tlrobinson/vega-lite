@@ -32,7 +32,7 @@ export interface ScaleMap {
   shape?: Scale;
 };
 
-import {Selection, parseSelections} from '../parse/selections';
+import * as selections from './selections';
 
 /**
  * Internal model of Vega-Lite specification for the compiler.
@@ -155,7 +155,7 @@ export class Model {
     this._stack = compileStackProperties(mark, encoding, scale, config);
     this._config.mark = compileMarkConfig(mark, encoding, config, this._stack);
 
-    parseSelections(this);
+    selections.parse(this);
   }
 
   public stack(): StackProperties {
@@ -353,7 +353,7 @@ export class Model {
     return this.config().mark.size;
   }
 
-  public selection(name:string = undefined, def:Selection = undefined) {
+  public selection(name:string = undefined, def:selections.Selection = undefined) {
     var len = arguments.length;
     return (!len) ? this._selections :
       (len === 1) ? this._spec.select[name] :
