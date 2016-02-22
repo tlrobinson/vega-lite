@@ -1,5 +1,5 @@
 import {SortOrder} from '../enums';
-import {AggregateOp} from '../aggregate';
+import {Aggregate} from '../aggregate';
 
 export interface SortField {
   /**
@@ -9,7 +9,7 @@ export interface SortField {
   /**
    * The sort aggregation operator
    */
-  op: AggregateOp;
+  op: Aggregate;
 
   order?: SortOrder;
 }

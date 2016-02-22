@@ -13,7 +13,7 @@ import {field} from '../fielddef';
 import {QUANTITATIVE, TEMPORAL, ORDINAL} from '../type';
 import {scaleType} from './scale';
 import {parseExpression, rawDomain} from './time';
-import {AggregateOp} from '../aggregate';
+import {Aggregate} from '../aggregate';
 
 const DEFAULT_NULL_FILTERS = {
   nominal: false,
@@ -235,7 +235,7 @@ export namespace summary {
     model.forEach(function(fieldDef: FieldDef, channel: Channel) {
       if (fieldDef.aggregate) {
         hasAggregate = true;
-        if (fieldDef.aggregate === AggregateOp.COUNT) {
+        if (fieldDef.aggregate === Aggregate.COUNT) {
           meas['*'] = meas['*'] || {};
           meas['*'].count = true;
         } else {

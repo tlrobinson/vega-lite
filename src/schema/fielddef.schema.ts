@@ -5,7 +5,7 @@ import {Scale} from './scale.schema';
 import {SortField} from './sort.schema';
 import {SortOrder} from '../enums';
 
-import {AggregateOp, AGGREGATE_OPS} from '../aggregate';
+import {Aggregate, AGGREGATE_OPS} from '../aggregate';
 import {toMap} from '../util';
 import {NOMINAL, ORDINAL, QUANTITATIVE, TEMPORAL, Type} from '../type';
 import {TimeUnit} from '../timeunit';
@@ -23,7 +23,7 @@ export interface FieldDef {
   // function
   timeUnit?: TimeUnit;
   bin?: boolean | BinProperties;
-  aggregate?: AggregateOp;
+  aggregate?: Aggregate;
 
   // TODO: maybe extend this in other app?
   // unused metadata -- for other application

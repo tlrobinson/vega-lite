@@ -4,7 +4,7 @@ import {Encoding} from './schema/encoding.schema';
 import {FieldDef} from './schema/fielddef.schema';
 import {Spec} from './schema/schema';
 
-import {AggregateOp, AGGREGATE_OPS} from './aggregate';
+import {Aggregate, AGGREGATE_OPS} from './aggregate';
 import {TIMEUNITS} from './timeunit';
 import {SHORT_TYPE, TYPE_FROM_SHORT_TYPE} from './type';
 import * as vlEncoding from './encoding';
@@ -81,7 +81,7 @@ export function parseFieldDef(fieldDefShorthand: string): FieldDef {
     var a = AGGREGATE_OPS[i];
     if (fieldDef.field.indexOf(a + '_') === 0) {
       fieldDef.field = fieldDef.field.substr(a.toString().length + 1);
-      if (a === AggregateOp.COUNT && fieldDef.field.length === 0) {
+      if (a === Aggregate.COUNT && fieldDef.field.length === 0) {
         fieldDef.field = '*';
       }
       fieldDef.aggregate = a;

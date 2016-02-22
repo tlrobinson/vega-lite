@@ -20,7 +20,7 @@ import {compileMarkConfig} from './config';
 import {compileStackProperties, StackProperties} from './stack';
 import {scaleType} from './scale';
 import {ScaleType} from '../enums';
-import {AggregateOp} from '../aggregate';
+import {Aggregate} from '../aggregate';
 
 export interface ScaleMap {
   x?: Scale;
@@ -83,7 +83,7 @@ export class Model {
       }
 
       if ((channel === PATH || channel === ORDER) && !fieldDef.aggregate && fieldDef.type === QUANTITATIVE) {
-        fieldDef.aggregate = AggregateOp.MIN;
+        fieldDef.aggregate = Aggregate.MIN;
       }
     }, this);
 

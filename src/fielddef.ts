@@ -4,7 +4,7 @@ import {FieldDef} from './schema/fielddef.schema';
 import {contains, getbins} from './util';
 import {NOMINAL, ORDINAL, QUANTITATIVE, TEMPORAL} from './type';
 import {TimeUnit} from './timeunit';
-import {AggregateOp} from './aggregate';
+import {Aggregate} from './aggregate';
 
 
 export interface FieldRefOption {
@@ -60,11 +60,11 @@ export function isMeasure(fieldDef: FieldDef) {
 export const COUNT_DISPLAYNAME = 'Number of Records';
 
 export function count(): FieldDef {
-  return { field: '*', aggregate: AggregateOp.COUNT, type: QUANTITATIVE, displayName: COUNT_DISPLAYNAME };
+  return { field: '*', aggregate: Aggregate.COUNT, type: QUANTITATIVE, displayName: COUNT_DISPLAYNAME };
 }
 
 export function isCount(fieldDef: FieldDef) {
-  return fieldDef.aggregate === AggregateOp.COUNT;
+  return fieldDef.aggregate === Aggregate.COUNT;
 }
 
 // FIXME remove this, and the getbins method
