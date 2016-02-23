@@ -10,8 +10,8 @@ export enum Types {
 }
 
 export enum Stores {
-  POINT  = 'point'  as any,
-  POINTS = 'points' as any
+  SINGLE = 'single'  as any,
+  MULTI  = 'multi' as any
 }
 
 export interface Selection {
@@ -29,7 +29,7 @@ export interface Selection {
 }
 
 export function storeName(sel: Selection) {
-  return sel.name + (sel.store === Stores.POINTS ? '_db' : '');
+  return sel.name + (sel.store === Stores.MULTI ? '_db' : '');
 }
 
 export function parse(model: Model) {
@@ -41,7 +41,7 @@ export function parse(model: Model) {
     sel.name = k;
     sel.on = sel.on || 'click';
 
-    if (sel.store === Stores.POINTS && sel.toggle === undefined && !sel.toggle && !sel.domain) {
+    if (sel.store === Stores.MULTI && sel.toggle === undefined && !sel.toggle && !sel.domain) {
       sel.toggle = true;
     }
 
@@ -85,7 +85,7 @@ export function compileSignals(model: Model) {
 
     // We only need the clear signal if we're using a points store.
     // Transforms can clear out signal names to not have them added.
-    if (sel.store === Stores.POINTS && clear.name) {
+    if (sel.store === Stores.MULTI && clear.name) {
       signals.unshift(clear);
     }
 
@@ -97,7 +97,7 @@ export function compileSignals(model: Model) {
 export function compileData(model: Model) {
   var data = [];
   model.selection().forEach(function(sel: Selection) {
-    if (sel.store !== Stores.POINTS) return;
+    if (sel.store !== Stores.MULTI) return;
     var db = {
       name: storeName(sel),
       transform: [],

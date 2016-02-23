@@ -13,11 +13,11 @@ export function parse(_, sel: s.Selection) {
     return u.isString(p) ? {field: p} : p;
   });
 
-  if (sel.store === s.Stores.POINT) {
+  if (sel.store === s.Stores.SINGLE) {
     sel.predicate = sel.project.map(function(p) {
       return 'datum.'+p.field+ ' === '+sel.name+'.'+fieldName(p)
     }).join(' && ');
-  } else if (sel.store === s.Stores.POINTS) {
+  } else if (sel.store === s.Stores.MULTI) {
     sel.predicate = sel.project.map(function(p) {
       return "indata('"+s.storeName(sel)+"', datum."+p.field+", '"+fieldName(p)+"')";
     }).join(' && ');
