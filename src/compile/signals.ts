@@ -9,6 +9,6 @@ interface VgSignal {
   streams: any;
 }
 
-export function compileSignals(model: Model): VgSignal[] {
+export function compileSignals(model: Model) {
   return [].concat(selections(model));
 }

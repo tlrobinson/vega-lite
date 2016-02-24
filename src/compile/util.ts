@@ -21,21 +21,18 @@ export function applyColorAndOpacity(p, model: Model) {
 
   const property = filled ? 'fill' : 'stroke';
   compileProductionRule(model, COLOR, p, function(fieldDef) {
-    let value, prop = {};
-    if (model.has(COLOR)) {
-      value = {
+    var prop = {};
+    if (fieldDef.field) {
+      prop[property] = {
         scale: model.scaleName(COLOR),
-        field: model.field(COLOR, fieldDef.type === ORDINAL ? {prefn: 'rank_'} : {})
-      };
-    } else if (fieldDef && fieldDef.value) {
-      value = { value: fieldDef.value };
+        field: model.field(COLOR, fieldDef.type === ORDINAL ? { prefn: 'rank_' } : {}, fieldDef)
+      }
+    } else if (fieldDef.value) {
+      prop[property] = { value: fieldDef.value };
+    } else {
+      prop[property] = { value: model.config().mark.color };
     }
-
-    prop[property] = value || p[property] || {value: model.config().mark.color};
-
-    if (value !== undefined) {
-      prop[property] = value
-    }
+    return prop;
   });
 }
 

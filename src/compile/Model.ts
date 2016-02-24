@@ -215,7 +215,7 @@ export class Model {
   }
 
   public fieldDef(channel: Channel, getRule: Boolean = false): FieldDef {
-    var def = this._spec.encoding[channel];
+    var def = this._spec.encoding[channel] || {};
     // TODO: HACK FOR NOW, just assume if it's a rule the first branch is the ruleDef.
     return def.rule && !getRule ? extend({}, def.rule[0], def) : def;
   }

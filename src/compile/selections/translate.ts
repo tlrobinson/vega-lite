@@ -28,10 +28,16 @@ export function compileSignals(model: Model, sel: s.Selection, trigger, __, sign
   signals.push({
     name: delta,
     init: {x: 0, y: 0},
-    streams: [{
-      type: on.str,
-      expr: '{x: '+anchor+'.x - eventX(), y: eventY() - '+anchor+'.y}'
-    }]
+    streams: [
+      {
+        type: on.start.str,
+        expr: '{x: 0, y: 0}'
+      },
+      {
+        type: on.str,
+        expr: '{x: '+anchor+'.x - eventX(), y: eventY() - '+anchor+'.y}'
+      }
+    ]
   });
 
   signals.push({
@@ -45,7 +51,7 @@ export function compileSignals(model: Model, sel: s.Selection, trigger, __, sign
   });
 }
 
-var DIMS = {x: 'width', y: 'height'};
+var DIMS = {x: 'cell.width', y: 'cell.height'};
 export function compileData(model: Model, sel: s.Selection, db) {
   var tx = db.transform, anchor = anchorName(sel), delta = deltaName(sel);
   sel.project.forEach(function(p) {

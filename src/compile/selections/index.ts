@@ -60,7 +60,14 @@ export function parse(model: Model) {
 }
 
 export function compileSignals(model: Model) {
-  var signals = [];
+  var signals:any = [{
+    name: 'cell',
+    init: {width: 1, height: 1},
+    streams: [
+      {'type': 'mousedown', 'expr': 'eventGroup() || cell'}
+    ]
+  }];
+
   model.selection().forEach(function(sel: Selection) {
     var trigger = {
       name: sel.name,

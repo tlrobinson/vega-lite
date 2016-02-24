@@ -59,7 +59,8 @@ export function compileRootGroup(model: Model) {
       properties: {
         update: {
           width: {field: 'width'},
-          height: {field: 'height'}
+          height: {field: 'height'},
+          fill: {value: 'transparent'}
         }
       }
     });

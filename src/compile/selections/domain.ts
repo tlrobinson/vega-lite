@@ -1,19 +1,21 @@
 import {Model} from '../Model';
 import * as s from './';
 import * as u from '../../util';
-import {domain as scaleDomain, type as scaleType} from '../scale';
+import {domain as scaleDomain, scaleType} from '../scale';
+import {ScaleType} from '../../enums';
 
 // TODO: Support ordinal scales.
 export function parse(model: Model, sel: s.Selection) {
   sel.project = u.array(sel.domain);
   sel.project.forEach(function(channel, i) {
     var fieldDef = model.fieldDef(channel),
-        type = scaleType(fieldDef, channel, model.mark()),
-        domain = scaleDomain(model, channel, type),
+        scale  = model.scale(channel),
+        type   = scaleType(scale, fieldDef, channel, model.mark()),
+        domain = scaleDomain(scale, model, channel, type),
         fieldName = domain.field;
 
-    if (type === 'ordinal') return;
-    fieldDef.scale = {
+    if (type === ScaleType.ORDINAL) return;
+    u.extend(scale, {
       domain: {
         data: s.storeName(sel),
         field: ['min_'+fieldName, 'max_'+fieldName]
@@ -21,7 +23,7 @@ export function parse(model: Model, sel: s.Selection) {
       clamp: false,
       zero: false,
       nice: false
-    };
+    });
 
     sel.project[i] = {channel: channel, scaleType: type, field: fieldName};
   });
