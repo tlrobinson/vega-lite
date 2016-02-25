@@ -1,4 +1,6 @@
-import {Model} from './Model';
+import {UnitModel} from './unit';
+import {Model} from './model';
+
 import {FieldDef, OrderChannelDef} from '../fielddef';
 import {COLUMN, ROW, X, Y, SIZE, COLOR, SHAPE, TEXT, LABEL, Channel} from '../channel';
 import {field} from '../fielddef';
@@ -11,7 +13,7 @@ export const FILL_STROKE_CONFIG = ['fill', 'fillOpacity',
   'stroke', 'strokeWidth', 'strokeDash', 'strokeDashOffset', 'strokeOpacity',
   'opacity'];
 
-export function applyColorAndOpacity(p, model: Model) {
+export function applyColorAndOpacity(p, model: UnitModel) {
   const filled = model.config().mark.filled;
   const fieldDef = model.fieldDef(COLOR);
 
@@ -51,7 +53,7 @@ export function applyConfig(properties, config, propsList: string[]) {
   });
 }
 
-export function applyMarkConfig(marksProperties, model: Model, propsList: string[]) {
+export function applyMarkConfig(marksProperties, model: UnitModel, propsList: string[]) {
   applyConfig(marksProperties, model.config().mark, propsList);
 }
 

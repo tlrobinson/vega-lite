@@ -5,13 +5,20 @@ import {COLOR, SIZE, SHAPE, Channel} from '../channel';
 import {title as fieldTitle} from '../fielddef';
 import {AREA, BAR, TICK, TEXT, LINE, POINT, CIRCLE, SQUARE} from '../mark';
 import {extend, keys, without} from '../util';
-import {Model} from './Model';
+import {UnitModel} from './unit';
 import {applyMarkConfig, FILL_STROKE_CONFIG, formatMixins as utilFormatMixins, timeFormat} from './common';
 import {ORDINAL} from '../type';
 import {COLOR_LEGEND, COLOR_LEGEND_LABEL} from './scale';
+import {VgLegend} from '../vega.schema';
 
-export function compileLegends(model: Model) {
-  let defs = [];
+export interface LegendComponentMap {
+  color?: VgLegend;
+  size?: VgLegend;
+  shape?: VgLegend;
+}
+
+export function compileLegends(model: UnitModel): LegendComponentMap {
+  let legendMap: LegendComponentMap = {};
 
   if (model.has(COLOR) && model.legend(COLOR)) {
     const fieldDef = model.fieldDef(COLOR);
@@ -25,24 +32,24 @@ export function compileLegends(model: Model) {
     );
 
     const def = model.config().mark.filled ? { fill: scale } : { stroke: scale };
-    defs.push(compileLegend(model, COLOR, def));
+    legendMap.color = compileLegend(model, COLOR, def);
   }
 
   if (model.has(SIZE) && model.legend(SIZE)) {
-    defs.push(compileLegend(model, SIZE, {
+    legendMap.size = compileLegend(model, SIZE, {
       size: model.scaleName(SIZE)
-    }));
+    });
   }
 
   if (model.has(SHAPE) && model.legend(SHAPE)) {
-    defs.push(compileLegend(model, SHAPE, {
+    legendMap.shape = compileLegend(model, SHAPE, {
       shape: model.scaleName(SHAPE)
-    }));
+    });
   }
-  return defs;
+  return legendMap;
 }
 
-export function compileLegend(model: Model, channel: Channel, def) {
+export function compileLegend(model: UnitModel, channel: Channel, def): VgLegend {
   const fieldDef = model.fieldDef(channel);
   const legend = model.legend(channel);
 
@@ -82,7 +89,7 @@ export function title(legend: LegendProperties, fieldDef: FieldDef) {
   return fieldTitle(fieldDef);
 }
 
-export function formatMixins(legend: LegendProperties, model: Model, channel: Channel) {
+export function formatMixins(legend: LegendProperties, model: UnitModel, channel: Channel) {
   const fieldDef = model.fieldDef(channel);
 
   // If the channel is binned, we should not set the format because we have a range label
@@ -99,7 +106,7 @@ export function useColorLegendScale(fieldDef: FieldDef) {
 }
 
 namespace properties {
-  export function symbols(fieldDef: FieldDef, symbolsSpec, model: Model, channel: Channel) {
+  export function symbols(fieldDef: FieldDef, symbolsSpec, model: UnitModel, channel: Channel) {
     let symbols:any = {};
     const mark = model.mark();
 
@@ -161,7 +168,7 @@ namespace properties {
     return keys(symbols).length > 0 ? symbols : undefined;
   }
 
-  export function labels(fieldDef: FieldDef, symbolsSpec, model: Model, channel: Channel): any {
+  export function labels(fieldDef: FieldDef, symbolsSpec, model: UnitModel, channel: Channel): any {
     if (channel === COLOR) {
       if (fieldDef.type === ORDINAL) {
         return {

@@ -1,62 +1,38 @@
-import {SingleSpec} from '../spec';
-import {AxisProperties} from '../axis';
-import {LegendProperties} from '../legend';
-import {Scale} from '../scale';
-import {Encoding} from '../encoding';
-import {FieldDef} from '../fielddef';
-import {defaultConfig, Config} from '../config';
-
-import {COLUMN, ROW, X, Y, COLOR, SHAPE, SIZE, TEXT, PATH, ORDER, Channel, supportMark} from '../channel';
+import {AggregateOp} from '../aggregate';
+import {COLUMN, ROW, X, Y, COLOR, SHAPE, SIZE, TEXT, PATH, ORDER, Channel, CHANNELS, supportMark} from '../channel';
+import {defaultConfig} from '../config';
 import {SOURCE, SUMMARY} from '../data';
-import {FieldRefOption, field} from '../fielddef';
-import * as vlEncoding from '../encoding';
+import * as vlEncoding from '../encoding'; // TODO: remove
+import {FieldDef, FieldRefOption, field} from '../fielddef';
 import {Mark, TEXT as TEXTMARK} from '../mark';
-
+import {ScaleType} from '../scale';
+import {SingleSpec} from '../spec';
 import {getFullName, QUANTITATIVE} from '../type';
 import {duplicate, extend, contains, mergeDeep} from '../util';
+import {VgData} from '../vega.schema';
 
+import {compileAxis} from './axis';
+import {applyConfig, FILL_STROKE_CONFIG} from './common';
 import {compileMarkConfig} from './config';
+import {assembleData, compileUnitData} from './data';
+import {compileLegends} from './legend';
+import {assembleLayout, compileUnitLayout} from './layout';
+import {Model} from './model';
+import {compileMark} from './mark/mark';
+import {compileScale, scaleType} from './scale';
 import {compileStackProperties, StackProperties} from './stack';
-import {scaleType} from './scale';
-import {ScaleType} from '../scale';
-import {AggregateOp} from '../aggregate';
-import {CHANNELS} from '../channel';
-
-export interface ScaleMap {
-  x?: Scale;
-  y?: Scale;
-  row?: Scale;
-  column?: Scale;
-  color?: Scale;
-  size?: Scale;
-  shape?: Scale;
-};
 
 /**
  * Internal model of Vega-Lite specification for the compiler.
  */
-export class Model {
+export class UnitModel extends Model {
+  // TODO: decompose this into FacetModel
   private _spec: SingleSpec;
   private _stack: StackProperties;
 
-  private _scale: ScaleMap;
-
-  private _axis: {
-    x?: AxisProperties;
-    y?: AxisProperties;
-    row?: AxisProperties;
-    column?: AxisProperties;
-  };
-
-  private _legend: {
-    color?: LegendProperties;
-    size?: LegendProperties;
-    shape?: LegendProperties;
-  };
-
-  private _config: Config;
-
   constructor(spec: SingleSpec) {
+    super(spec);
+
     const model = this; // For self-reference in children method.
 
     this._spec = spec;
@@ -151,6 +127,61 @@ export class Model {
     this._config.mark = compileMarkConfig(mark, encoding, config, this._stack);
   }
 
+  public compileData() {
+    this.component.data = compileUnitData(this);
+  }
+
+  public compileLayout() {
+    this.component.layout = compileUnitLayout(this);
+  }
+
+  public compileScale() {
+    this.component.scale = compileScale(this);
+  }
+
+  public compileMark() {
+    this.component.mark = compileMark(this);
+  }
+
+  public compileAxis() {
+    let axes: any = this.component.axis = {};
+    if (this.has(X)) {
+      axes.x = compileAxis(X, this);
+    }
+    if (this.has(Y)) {
+      axes.y = compileAxis(Y, this);
+    }
+  }
+
+  public compileLegend() {
+    return compileLegends(this);
+  }
+
+  public assembleData(data: VgData[]): VgData[] {
+    return assembleData(this, data);
+  }
+
+  public assembleLayout(layoutData: VgData[]): VgData[] {
+    return assembleLayout(this, layoutData);
+  }
+
+  public assembleMarks() {
+    return this.component.mark;
+  }
+
+  public assembleGroupProperties() {
+    // FIXME need to think how this works with facet
+    return applyConfig({}, this.config().cell, FILL_STROKE_CONFIG.concat(['clip']));
+  }
+
+  public channels() {
+    return CHANNELS;
+  }
+
+  protected mapping() {
+    return this.encoding();
+  }
+
   public stack(): StackProperties {
     return this._stack;
   }
@@ -176,11 +207,13 @@ export class Model {
     return spec;
   }
 
+  // TODO: remove
   public cellWidth(): number {
     return (this.isFacet() ? this.config().facet.cell.width : null) ||
       this.config().cell.width;
   }
 
+  // TODO: remove
   public cellHeight(): number {
     return (this.isFacet() ? this.config().facet.cell.height : null) ||
       this.config().cell.height;
@@ -188,11 +221,6 @@ export class Model {
 
   public mark(): Mark {
     return this._spec.mark;
-  }
-
-  // TODO: remove
-  public spec(): SingleSpec {
-    return this._spec;
   }
 
   public has(channel: Channel) {
@@ -212,39 +240,17 @@ export class Model {
   /** Get "field" reference for vega */
   public field(channel: Channel, opt: FieldRefOption = {}) {
     const fieldDef = this.fieldDef(channel);
-    const scale = this.scale(channel);
 
     if (fieldDef.bin) { // bin has default suffix that depends on scaleType
       opt = extend({
-        binSuffix: scaleType(scale, fieldDef, channel, this.mark()) === ScaleType.ORDINAL ? '_range' : '_start'
+        binSuffix: this.scale(channel).type === ScaleType.ORDINAL ? '_range' : '_start'
       }, opt);
     }
 
     return field(fieldDef, opt);
   }
 
-  public channelWithScales(): Channel[] {
-    const model = this;
-    return CHANNELS.filter(function(channel) {
-      return !!model.scale(channel);
-    });
-  }
-
-  public reduce(f: (acc: any, fd: FieldDef, c: Channel, e: Encoding) => any, init, t?: any) {
-    return vlEncoding.reduce(this._spec.encoding, f, init, t);
-  }
-
-  public forEach(f: (fd: FieldDef, c: Channel, i:number) => void, t?: any) {
-    vlEncoding.forEach(this._spec.encoding, f, t);
-  }
-
-  public isOrdinalScale(channel: Channel) {
-    const fieldDef = this.fieldDef(channel);
-    const scale = this.scale(channel);
-
-    return this.has(channel) && scaleType(scale, fieldDef, channel, this.mark()) === ScaleType.ORDINAL;
-  }
-
+  // TODO: remove
   public isFacet() {
     return this.has(ROW) || this.has(COLUMN);
   }
@@ -253,41 +259,4 @@ export class Model {
     return vlEncoding.isAggregate(this._spec.encoding) ? SUMMARY : SOURCE;
   }
 
-  public data() {
-    return this._spec.data;
-  }
-
-  public transform() {
-    return this._spec.transform || {};
-  }
-
-  /**
-   * Get the spec configuration.
-   */
-  public config() {
-    return this._config;
-  }
-
-  public sort(channel: Channel) {
-    return this._spec.encoding[channel].sort;
-  }
-
-  public scale(channel: Channel): Scale {
-    return this._scale[channel];
-  }
-
-
-  public axis(channel: Channel): AxisProperties {
-    return this._axis[channel];
-  }
-
-  public legend(channel: Channel): LegendProperties {
-    return this._legend[channel];
-  }
-
-  /** returns scale name for a given channel */
-  public scaleName(channel: Channel|string): string {
-    const name = this.spec().name;
-    return (name ? name + '-' : '') + channel;
-  }
 }

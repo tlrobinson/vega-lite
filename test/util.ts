@@ -1,4 +1,4 @@
-import {Model} from '../src/compile/Model';
+import {UnitModel} from '../src/compile/unit';
 import {SingleSpec} from '../src/spec';
 import {contains} from '../src/util';
 
@@ -7,7 +7,8 @@ import {contains} from '../src/util';
  * We use this in tests to allow using raw JSON.
  */
 export function parseModel(spec) {
-  return new Model(spec as SingleSpec);
+  // TODO: support other type of model as well
+  return new UnitModel(spec as SingleSpec);
 }
 
 export const zSchema = require('z-schema');

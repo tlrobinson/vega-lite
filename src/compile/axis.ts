@@ -5,7 +5,8 @@ import {NOMINAL, ORDINAL, TEMPORAL} from '../type';
 import {contains, extend, truncate} from '../util';
 
 import {formatMixins} from './common';
-import {Model} from './Model';
+import {Model} from './model';
+import {UnitModel} from './unit';
 
 // https://github.com/Microsoft/TypeScript/blob/master/doc/spec.md#11-ambient-declarations
 declare let exports;
@@ -202,12 +203,15 @@ export function title(model: Model, channel: Channel) {
   if (axis.titleMaxLength) {
     maxLength = axis.titleMaxLength;
   } else if (channel === X && !model.isOrdinalScale(X)) {
+    const unitModel: UnitModel = model as any; // only unit model has channel x
     // For non-ordinal scale, we know cell size at compile time, we can guess max length
-    maxLength = model.cellWidth() / model.axis(X).characterWidth;
+    maxLength = unitModel.cellWidth() / model.axis(X).characterWidth;
   } else if (channel === Y && !model.isOrdinalScale(Y)) {
+    const unitModel: UnitModel = model as any; // only unit model has channel y
     // For non-ordinal scale, we know cell size at compile time, we can guess max length
-    maxLength = model.cellHeight() / model.axis(Y).characterWidth;
+    maxLength = unitModel.cellHeight() / model.axis(Y).characterWidth;
   }
+
   // FIXME: we should use template to truncate instead
   return maxLength ? truncate(fieldTitle, maxLength) : fieldTitle;
 }

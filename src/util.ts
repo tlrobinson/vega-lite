@@ -1,7 +1,12 @@
 /// <reference path="../typings/datalib.d.ts"/>
 
+import {isArray} from 'datalib/src/util';
+
 export {keys, extend, duplicate, isArray, vals, truncate, toMap, isObject} from 'datalib/src/util';
 export {range} from 'datalib/src/generate';
+export {has} from './encoding'
+export {FieldDef} from './fielddef';
+export {Channel} from './channel';
 
 export function contains<T>(array: Array<T>, item: T) {
   return array.indexOf(item) > -1;
@@ -73,6 +78,10 @@ export function all<T>(arr: Array<T>, f: (d: T, k?, i?) => boolean) {
   return true;
 }
 
+export function mergeArrays(arrays: any[]) {
+  return [].concat.apply([], arrays);
+}
+
 export function mergeDeep(dest, ...src: any[]) {
   for (let i = 0; i < src.length; i++) {
     dest = deepMerge_(dest, src[i]);
@@ -117,3 +126,9 @@ export function getbins(stats, maxbins) {
 export function error(message: any) {
   console.error('[VL Error]', message);
 }
+
+export interface Dict<T> {
+    [key: string]: T;
+}
+
+export type StringSet = Dict<boolean>;
