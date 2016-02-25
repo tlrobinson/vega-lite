@@ -88,6 +88,7 @@
     "test/compile/stack.test.ts",
     "test/fielddef.test.ts",
     "test/schema.test.ts",
+    "test/spec.test.ts",
     "test/type.test.ts",
     "test/util.ts",
     "test/validate.test.ts",

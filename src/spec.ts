@@ -46,6 +46,44 @@ export interface FacetSpec extends BaseSpec {
 
 export type Spec = SingleSpec | FacetSpec;
 
+// TODO: type Spec doesn't work with the schema yet so use the following as a
+// hack for the schema.
+export interface SpecSchema extends SingleSpec, FacetSpec {}
+
+/**
+ * Decompose extended unit specs into composition of pure unit specs.
+ */
+export function singularize(spec: SingleSpec): Spec {
+  const hasRow = has(spec.encoding, ROW);
+  const hasColumn = has(spec.encoding, COLUMN);
+
+  if (hasRow || hasColumn) {
+    // TODO: @arvind please  add interaction syntax here
+    let encoding = duplicate(spec.encoding);
+    delete encoding.column;
+    delete encoding.row;
+
+    return extend(
+      spec.name ? {name: spec.name} : {},
+      spec.description ? {description: spec.description} : {},
+      {data: spec.data},
+      spec.transform ? {transform: spec.transform} : {},
+      {
+        facet: extend(
+          hasRow ? {row: spec.encoding.row } : {},
+          hasColumn ? {column: spec.encoding.column } : {}
+        ),
+        spec: {
+          mark: spec.mark,
+          encoding: encoding
+        }
+      },
+      spec.config ? {config: spec.config} : {}
+    );
+  }
+  return spec;
+}
+
 // TODO: add vl.spec.validate & move stuff from vl.validate to here
 
 export function alwaysNoOcclusion(spec: SingleSpec): boolean {
