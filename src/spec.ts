@@ -5,14 +5,23 @@ import {FieldDef} from './fielddef';
 
 import {Config} from './config';
 import {Data} from './data';
-import {Encoding} from './encoding';
+import {Encoding,has} from './encoding';
+import {Facet} from './facet';
 import {Mark} from './mark';
 import {Transform} from './transform';
 
-import {COLOR, SHAPE} from './channel';
+import {COLOR, SHAPE, ROW, COLUMN} from './channel';
 import * as vlEncoding from './encoding';
 import {BAR, AREA} from './mark';
-import {duplicate} from './util';
+import {duplicate, extend} from './util';
+
+export interface BaseSpec {
+  name?: string;
+  description?: string;
+  data?: Data;
+  transform?: Transform;
+  config?: Config;
+}
 
 /**
  * Schema for a single Vega-Lite specification.
@@ -21,20 +30,21 @@ import {duplicate} from './util';
  * 
  * @required ["mark", "encoding"]
  */
-export interface SingleSpec {
+export interface SingleSpec extends BaseSpec {
   /**
    * A name for the specification. The name is used to annotate marks, scale names, and more.
    */
-  name?: string;
-  description?: string;
-  data?: Data;
-  transform?: Transform;
   mark: Mark;
   encoding: Encoding;
-  config?: Config;
 }
 
-export interface Spec extends SingleSpec {};
+export interface FacetSpec extends BaseSpec {
+  facet: Facet;
+  // FIXME: Ideally FacetSpec but this leads to infinite loop in generating schema
+  spec: SingleSpec;
+}
+
+export type Spec = SingleSpec | FacetSpec;
 
 // TODO: add vl.spec.validate & move stuff from vl.validate to here
 
