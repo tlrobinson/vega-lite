@@ -17,7 +17,7 @@ export namespace text {
       height: { field: { group: 'height' } },
       fill: {
         scale: model.scaleName(COLOR),
-        field: model.field(COLOR, model.fieldDef(COLOR).type === ORDINAL ? {prefn: 'rank_'} : {})
+        field: model.field(COLOR, model.encoding().color.type === ORDINAL ? {prefn: 'rank_'} : {})
       }
     };
   }
@@ -30,7 +30,7 @@ export namespace text {
       ['angle', 'align', 'baseline', 'dx', 'dy', 'font', 'fontWeight',
         'fontStyle', 'radius', 'theta', 'text']);
 
-    const fieldDef = model.fieldDef(TEXT);
+    const fieldDef = model.encoding().text;
 
     // x
     if (model.has(X)) {
@@ -39,7 +39,7 @@ export namespace text {
         field: model.field(X, { binSuffix: '_mid' })
       };
     } else { // TODO: support x.value, x.datum
-      if (model.has(TEXT) && model.fieldDef(TEXT).type === QUANTITATIVE) {
+      if (model.has(TEXT) && model.encoding().text.type === QUANTITATIVE) {
         p.x = { field: { group: 'width' }, offset: -5 };
       } else {
         p.x = { value: model.config().scale.textBandWidth / 2 };
@@ -79,7 +79,7 @@ export namespace text {
 
     // text
     if (model.has(TEXT)) {
-      if (contains([QUANTITATIVE, TEMPORAL], model.fieldDef(TEXT).type)) {
+      if (contains([QUANTITATIVE, TEMPORAL], model.encoding().text.type)) {
         const format = model.config().mark.format;
         extend(p, formatMixins(model, TEXT, format));
       } else {
@@ -93,7 +93,7 @@ export namespace text {
   }
 
   function sizeValue(model: Model) {
-    const fieldDef = model.fieldDef(SIZE);
+    const fieldDef = model.encoding().size;
     if (fieldDef && fieldDef.value !== undefined) {
        return fieldDef.value;
     }

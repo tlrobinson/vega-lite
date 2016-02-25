@@ -341,7 +341,7 @@ export namespace dates {
 // We need to add a rank transform so that we can use the rank value as
 // input for color ramp's linear scale.
 export function rankTransform(dataTable, model: Model) {
-  if (model.has(COLOR) && model.fieldDef(COLOR).type === ORDINAL) {
+  if (model.has(COLOR) && model.encoding().color.type === ORDINAL) {
     dataTable.transform = dataTable.transform.concat([{
       type: 'sort',
       by: model.field(COLOR)

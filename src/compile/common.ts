@@ -13,7 +13,7 @@ export const FILL_STROKE_CONFIG = ['fill', 'fillOpacity',
 
 export function applyColorAndOpacity(p, model: Model) {
   const filled = model.config().mark.filled;
-  const fieldDef = model.fieldDef(COLOR);
+  const fieldDef = model.encoding().color;
 
   // Apply fill stroke config first so that color field / value can override
   // fill / stroke

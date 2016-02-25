@@ -49,8 +49,8 @@ export namespace point {
         scale: model.scaleName(SHAPE),
         field: model.field(SHAPE)
       };
-    } else if (model.fieldDef(SHAPE).value) {
-      p.shape = { value: model.fieldDef(SHAPE).value };
+    } else if (model.encoding().shape.value) {
+      p.shape = { value: model.encoding().shape.value };
     } else if (model.config().mark.shape) {
       p.shape = { value: model.config().mark.shape };
     }
@@ -60,7 +60,7 @@ export namespace point {
   }
 
   function sizeValue(model: Model) {
-    const fieldDef = model.fieldDef(SIZE);
+    const fieldDef = model.encoding().size;
     if (fieldDef && fieldDef.value !== undefined) {
        return fieldDef.value;
     }

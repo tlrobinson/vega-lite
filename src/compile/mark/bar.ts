@@ -45,7 +45,7 @@ export namespace bar {
         };
         p.width = {value: sizeValue(model, X)};
       }
-    } else if (model.fieldDef(X).bin) {
+    } else if (model.encoding().x.bin) {
       if (model.has(SIZE) && orient !== 'horizontal') {
         // For vertical chart that has binned X and size,
         // center bar and apply size to width.
@@ -116,7 +116,7 @@ export namespace bar {
         };
         p.height = { value: sizeValue(model, Y) };
       }
-    } else if (model.fieldDef(Y).bin) {
+    } else if (model.encoding().y.bin) {
       if (model.has(SIZE) && orient === 'horizontal') {
         // For horizontal chart that has binned Y and size,
         // center bar and apply size to height.
@@ -168,7 +168,7 @@ export namespace bar {
   }
 
   function sizeValue(model: Model, channel: Channel) {
-    const fieldDef = model.fieldDef(SIZE);
+    const fieldDef = model.encoding().size;
     if (fieldDef && fieldDef.value !== undefined) {
        return fieldDef.value;
     }
